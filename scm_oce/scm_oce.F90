@@ -42,6 +42,8 @@ subroutine obl_stp(  z_r     ,      &            ! Depth at cell centers    [m]
                      lin_eos ,      &            ! Boolean for use of linear equation of state
                      alpha   ,      &            ! Thermal expansion coefficient in linear EOS
                      T0      ,      &            ! Reference temperature in linear EOS
+                     beta   ,       &            ! Haline contraction coefficient in linear EOS
+                     S0      ,      &            ! Reference salinity in linear EOS
                      Zob     ,      &            ! Bottom roughness length
                      Neu_bot ,      &            ! Bottom boundary condition for GLS prognostic variables
                      EVD     ,      &            ! Activation of EVD for TKE Scheme
@@ -91,7 +93,7 @@ subroutine obl_stp(  z_r     ,      &            ! Depth at cell centers    [m]
        real(8),                       intent(in   ) ::  svstr
        real(8),                       intent(in   ) ::  srflx
        real(8),                       intent(in   ) ::  stflx1,stflx2
-       real(8),                       intent(in   ) ::  f,Ricr,dt,dpdx,rho0,alpha,T0
+       real(8),                       intent(in   ) ::  f,Ricr,dt,dpdx,rho0,alpha,T0,beta,S0
        real(8),                       intent(in   ) ::  r_D,zOb
 ! local variables
        integer                                      ::  k,itrc
@@ -134,7 +136,7 @@ subroutine obl_stp(  z_r     ,      &            ! Depth at cell centers    [m]
        call  lmd_swfrac (N, swr_frac, Hz )
 
        IF(lin_eos) THEN
-          call  rho_lin_eos    (N, rho1,bvf, t(:,nstp,1:2),z_r,rho0,alpha,T0 )
+          call  rho_lin_eos    (N, rho1,bvf, t(:,nstp,1:2),z_r,rho0,alpha,T0,beta,S0)
        ELSE
           call  rho_eos        (N, rho1,bvf, t(:,nstp,1:2),z_r,rho0 )
        ENDIF
@@ -404,7 +406,7 @@ END SUBROUTINE rho_eos
 
 
 !===================================================================================================
-       SUBROUTINE rho_lin_eos (N,rho1,bvf,t,z_r,rho0,Tcoef,T0)
+       SUBROUTINE rho_lin_eos (N,rho1,bvf,t,z_r,rho0,Tcoef,T0,Scoef,S0)
 !---------------------------------------------------------------------------------------------------
       implicit none
 !
@@ -415,7 +417,7 @@ END SUBROUTINE rho_eos
       real(8), intent(  out)                   :: rho1(1:N)
       real(8), intent(in   )                   :: t  (1:N,2)
       real(8), intent(in   )                   :: z_r(1:N  )
-      real(8), intent(in   )                   :: rho0, Tcoef, T0
+      real(8), intent(in   )                   :: rho0, Tcoef, T0, Scoef, S0
 ! local variables
       real(8)                                  :: Ts,Tt,sqrtTs
       integer                                  :: k
@@ -427,7 +429,7 @@ END SUBROUTINE rho_eos
 !-------
       do k=1,N
 !----
-         rho1(k)= rho0*( 1. - Tcoef*( t(k,1) - T0 ) )     ! + Scoef*(t(i,j,k,nrhs,isalt)-S0)
+         rho1(k)= rho0*( 1. - Tcoef*( t(k,1) - T0 ) + Scoef*( t(k,2) - S0 ))
 !----
     enddo
 !----
