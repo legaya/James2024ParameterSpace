@@ -1,4 +1,4 @@
-# James2023_ParameterSpace
+# James2024ParameterSpace
 
 This repository contains all the codes used for Legay et al. "A framework for evaluating ocean mixed layer depth evolution". 
 It includes the Jupyter Notebook used for performing the 1D simulations and all the analyses ("AnalysesParameterSpace.pynb"), the 1D model as a Fortran Module "scm_oce.so", and the Fortran codes needed for generating this module (in the folder "scm_oce"). 
